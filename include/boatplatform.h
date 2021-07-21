@@ -26,7 +26,6 @@
 //#include "boatinternal.h"
 #include <stdbool.h>
 #include <stddef.h>
-#include "boatoptions.h"
 #include "boattypes.h"
 #include "boaterrcode.h"
 
@@ -62,8 +61,8 @@ extern "C" {
  * @param rsvd
  *   reserved for futrue. 
  *
- * @return BOAT_RESULT 
- *   return BOAT_SUCCESS if generate success; otherwise return a negative error code
+ * @return 
+ *   Return \c BOAT_SUCCESS if generate success; otherwise return a negative error code
  ******************************************************************************/
 BOAT_RESULT  BoatHash( const BoatHashAlgType type, const BUINT8* input, BUINT32 inputLen, 
 				       BUINT8* hashed, BUINT8* hashedLen, void* rsvd );
@@ -82,7 +81,7 @@ BOAT_RESULT  BoatHash( const BoatHashAlgType type, const BUINT8* input, BUINT32 
  *   This function returns the address of the allocated memory. If allocation\n
  *  fails, it returns NULL.
  ******************************************************************************/
-void   *BoatMalloc(BUINT32 size);
+void   *BoatMalloc(size_t size);
 
 
 /*!****************************************************************************

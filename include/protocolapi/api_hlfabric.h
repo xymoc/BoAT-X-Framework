@@ -29,6 +29,25 @@ api_hlfabric.h is header file for fabric transaction construction and performing
  * @{
  */
 
+#define BOAT_HLFABRIC_NODE_URL_MAX_LEN           127  //!< Maxmum length of node's URL
+#define BOAT_HLFABRIC_HOSTNAME_MAX_LEN           127  //!< Maxmum length of hostname
+#define BOAT_HLFABRIC_CERT_MAX_LEN               1024 //!< Maxmum length of certificate
+
+
+#define BOAT_HLFABRIC_ARGS_MAX_NUM               10   //!< Arguments max number in fabric command
+#define BOAT_HLFABRIC_ENDORSER_MAX_NUM           10  //!< Support endorser max number
+#define BOAT_HLFABRIC_ORDERER_MAX_NUM            4   //!< Support orderer max number
+
+#define BOAT_HLFABRIC_TLS_SUPPORT                1 //!< If need client support TLS, set it to 1.
+#define BOAT_HLFABRIC_TLS_IDENTIFY_CLIENT        0 //!< If server need identify client, set it to 1.
+
+                                                   //!< This macro valid only BOAT_HLFABRIC_TLS_SUPPORT has
+                                                   //!< set to 1. 
+												   //!< @note This macro is reserved for future.
+#define BOAT_HLFABRIC_ROOTCA_MAX_NUM             3 //!< Support ROOT CA certificate max number
+
+#define BOAT_HLFABRIC_HTTP2_SEND_BUF_MAX_LEN     8192 //!< The maximum length of HTTP2 send buffer
+
 //!@brief fabric transaction type
 //! 
 typedef enum{
@@ -49,7 +68,7 @@ typedef struct TBoatHlfabricKeyPair{
 //!@brief fabric all fully trusted top-level CAs
 //! fabric all fully trusted top-level CAs
 typedef struct TBoatHlfabricTlsCAchain{
-	BoatFieldVariable      ca[HLFABRIC_ROOTCA_MAX_NUM]; //!< rootCA certificate content
+	BoatFieldVariable      ca[BOAT_HLFABRIC_ROOTCA_MAX_NUM]; //!< rootCA certificate content
 }BoatHlfabricTlsCAchain;
 
 
@@ -58,7 +77,7 @@ typedef struct TBoatHlfabricTlsCAchain{
 typedef struct TBoatHlfabricNodeInfo{
 	BCHAR*  nodeUrl;  //!< URL of the blockchain node, e.g. "http://a.b.com:8545"	
 	BCHAR*  hostName; //!< tls server hostname, it's 'CN' field in server certificate
-					  //!< if HLFABRIC_TLS_SUPPORT is enabled, set is a correct value, otherwise set it NULL.
+					  //!< if BOAT_HLFABRIC_TLS_SUPPORT is enabled, set is a correct value, otherwise set it NULL.
 }BoatHlfabricNodeInfo;
 
 
@@ -67,8 +86,8 @@ typedef struct TBoatHlfabricNodeInfo{
 typedef struct TBoatHlfabricNetworkInfo{
 	BUINT16 endorserNum;  //!< this field is update by SDK, caller should not modify it manually
 	BUINT16 ordererNum;   //!< this field is update by SDK, caller should not modify it manually
-    BoatHlfabricNodeInfo  endorser[HLFABRIC_ENDORSER_MAX_NUM]; //!< endorser node information
-	BoatHlfabricNodeInfo  orderer[HLFABRIC_ORDERER_MAX_NUM];   //!< orderer node information
+    BoatHlfabricNodeInfo  endorser[BOAT_HLFABRIC_ENDORSER_MAX_NUM]; //!< endorser node information
+	BoatHlfabricNodeInfo  orderer[BOAT_HLFABRIC_ORDERER_MAX_NUM];   //!< orderer node information
 }BoatHlfabricNetworkInfo;
 
 
@@ -76,12 +95,12 @@ typedef struct TBoatHlfabricNetworkInfo{
 //! fabric wallet structure
 typedef struct TBoatHlfabricWallet{
 	BoatHlfabricKeyPair   account_info; //!< Account information
-#if (HLFABRIC_TLS_SUPPORT == 1)	
-#if (HLFABRIC_TLS_IDENTIFY_CLIENT == 1)
+#if (BOAT_HLFABRIC_TLS_SUPPORT == 1)	
+#if (BOAT_HLFABRIC_TLS_IDENTIFY_CLIENT == 1)
 	BoatHlfabricKeyPair       tlsClinet_info;//!< tls information
-#endif /* end of HLFABRIC_TLS_IDENTIFY_CLIENT */
+#endif /* end of BOAT_HLFABRIC_TLS_IDENTIFY_CLIENT */
 	BoatHlfabricTlsCAchain    tlsCAchain;   //!< tls rootCA certificate list
-#endif /* end of HLFABRIC_TLS_SUPPORT */
+#endif /* end of BOAT_HLFABRIC_TLS_SUPPORT */
     BoatHlfabricNetworkInfo   network_info; //!< Network information
 	
 	struct Thttp2IntfContext  *http2Context_ptr; //!< http2 information
@@ -99,15 +118,15 @@ typedef struct TBoatHlfabricTimestamp{
 //!@brief chaincodeId structure
 //! chaincodeId structure
 typedef struct TBoatHlfabricChaincodeId{
-	BCHAR*     path;    //!< the chaincode path, if unused, set it as NULL.
-	BCHAR*     name;    //!< the chaincode name
-	BCHAR*     version; //!< the chaincode version, if unused, set it as NULL.
+	BCHAR*     path;    //!< The chaincode path, if unused, set it as NULL.
+	BCHAR*     name;    //!< The chaincode name
+	BCHAR*     version; //!< The chaincode version, if unused, set it as NULL.
 }BoatHlfabricChaincodeId;
 
-//! transaction command arguments
+//! Transaction command arguments
 typedef struct TBoatHlfabricArgs{
 	BUINT32    nArgs;
-	BCHAR*     args[HLFABRIC_ARGS_MAX_NUM];
+	BCHAR*     args[BOAT_HLFABRIC_ARGS_MAX_NUM];
 }BoatHlfabricArgs;
 
 
@@ -133,55 +152,62 @@ typedef struct TBoatHlfabricSingleEndorserResponse{
 //! endorser node respond array
 typedef struct TBoatHlfabricProposalResponseArray{
 	BUINT16                            responseCount;
-	BoatHlfabricSingleEndorserResponse response[HLFABRIC_ENDORSER_MAX_NUM];
+	BoatHlfabricSingleEndorserResponse response[BOAT_HLFABRIC_ENDORSER_MAX_NUM];
 }BoatHlfabricEndorserResponse;
 
 
 //!@brief fabric transaction variable structure
 //! fabric transaction variable structure
 typedef struct TBoatHlfabricVariable{
-	BoatHlfabricType             type; //!< frame is proposal or trancaction,this field will maintenance by sdk,
+	BoatHlfabricType             type; //!< Frame is proposal or trancaction,this field will maintenance by sdk,
 	                                   //!< caller should not modify it manually. this field maybe removed in future version!
-	BoatHlfabricTimestamp        timestamp;  //!< transaction occurred datatime
-	BoatFieldMax24B              nonce;      //!< this field maintenanced by sdk, caller should not modify it manually
-	BoatHlfabricChaincodeId      chaincodeId;//!< chaincode attribute(path,name,version)
-	BoatHlfabricArgs             args;       //!< transaction arguments,e.g. "query a", "invoke a b 10".
-	BCHAR*                       channelId;  //!< channel name
-	BCHAR*                       orgName;    //!< organization name
+	BoatHlfabricTimestamp        timestamp;  //!< Transaction occurred datatime
+	BoatFieldMax24B              nonce;      //!< This field maintenanced by sdk, caller should not modify it manually
+	BoatHlfabricChaincodeId      chaincodeId;//!< Chaincode attribute(path,name,version)
+	BoatHlfabricArgs             args;       //!< Transaction arguments,e.g. "query a", "invoke a b 10".
+	BCHAR*                       channelId;  //!< Channel name
+	BCHAR*                       orgName;    //!< Organization name
 }BoatHlfabricVariable;
 
 
 //!@brief fabric transaction high level structure
 //! fabric transaction high level structure
 typedef struct TBoatHlfabricTx{
-	BoatHlfabricWallet*          wallet_ptr;       //!< pointer of the transaction wallet
-	BoatHlfabricVariable         var;              //!< necessary variable in transaction
-	BoatHlfabricEndorserResponse endorserResponse; //!< endorser respond contents
+	BoatHlfabricWallet*          wallet_ptr;       //!< Pointer of the transaction wallet
+	BoatHlfabricVariable         var;              //!< Necessary variable in transaction
+	BoatHlfabricEndorserResponse endorserResponse; //!< Endorser respond contents
 }BoatHlfabricTx;
+
+//!@brief fabric certificate information config structure
+//! fabric certificate information config structure
+typedef struct TBoatHlfabricCertInfoCfg{
+	BUINT32  length;                              //!< length of certificate content, this length contains the terminator '\0'.
+	BCHAR    content[BOAT_HLFABRIC_CERT_MAX_LEN]; //!< content of certificate.
+}BoatHlfabricCertInfoCfg;
 
 //!@brief fabric node information config structure
 //! fabric node information config structure
 typedef struct TBoatHlfabricNodeInfoCfg{
-	BCHAR  nodeUrl[BOAT_FILENAME_MAX_LEN];  //!< URL of the blockchain node, e.g. "http://a.b.com:8545"	
-	BCHAR  hostName[BOAT_FILENAME_MAX_LEN]; //!< tls server hostname, it's 'CN' field in server certificate
+	BCHAR  nodeUrl[BOAT_HLFABRIC_NODE_URL_MAX_LEN];  //!< URL of the blockchain node, e.g. "http://a.b.com:8545"	
+	BCHAR  hostName[BOAT_HLFABRIC_HOSTNAME_MAX_LEN]; //!< TLS server hostname, it's 'CN' field in server certificate
 }BoatHlfabricNodeInfoCfg;
 
 //!@brief fabric wallet config structure
 //! fabric wallet config structure
 typedef struct TBoatHlfabricWalletConfig{
 	BoatWalletPriKeyCtx_config  accountPriKey_config;
-	BCHAR                       accountCertFileName[BOAT_FILENAME_MAX_LEN]; 
+	BoatHlfabricCertInfoCfg     accountCertContent;   //!< certificate content of account
 
 	BoatWalletPriKeyCtx_config  tlsPriKey_config;
-	BCHAR                       tlsClientCertFileName[BOAT_FILENAME_MAX_LEN];
+	BoatHlfabricCertInfoCfg     tlsClientCertContent; //!< certificate content of TLS 	
 	
-	BUINT32 rootCaNumber; //the number of rootCA file to be set
-	BCHAR   rootCaFileName[HLFABRIC_ROOTCA_MAX_NUM][BOAT_FILENAME_MAX_LEN]; 
+	BUINT32 rootCaNumber; //!< The number of rootCA file to be set
+	BoatHlfabricCertInfoCfg     rootCaContent[BOAT_HLFABRIC_ROOTCA_MAX_NUM];//!< certificate content of rootCA
 
-	BUINT32                  endorserNumber;//!< the number of endorser to be set
-	BoatHlfabricNodeInfoCfg  endorser[HLFABRIC_ENDORSER_MAX_NUM];
-	BUINT32                  ordererNumber; //!< the number of orderer to be set
-	BoatHlfabricNodeInfoCfg  orderer[HLFABRIC_ORDERER_MAX_NUM];
+	BUINT32                     endorserNumber;//!< The number of endorser to be set
+	BoatHlfabricNodeInfoCfg     endorser[BOAT_HLFABRIC_ENDORSER_MAX_NUM];
+	BUINT32                     ordererNumber; //!< The number of orderer to be set
+	BoatHlfabricNodeInfoCfg     orderer[BOAT_HLFABRIC_ORDERER_MAX_NUM];
 }BoatHlfabricWalletConfig;
 
 #ifdef __cplusplus
@@ -191,117 +217,116 @@ extern "C" {
 
 /*!****************************************************************************
  * @brief 
- *   set fabric transaction related private key index and certificate information
+ *   Set fabric transaction related private key index and certificate information.
  * 
  * @details
- *   this function used to set transaction releated key pairs 
- *   information. the private key format is PCKS#8. for fabric, 
- *   the default used curve is SECP256R1. 
+ *   This function used to set transaction releated key pairs information.
+ *   The private key format is PCKS#8. for fabric, the default used curve is SECP256R1.
  *
  * @param wallet_ptr
- *   fabric wallet pointer
+ *   Fabric wallet pointer.
  *
  * @param prikeyCtx_config
- *   xxxxxx
+ *   The private key information to be settings.
  *
- * @param certName
- *   full path of certificate used by transaction
+ * @param certContent
+ *   The content of the certificate to be settings.
  *
- * @return BOAT_RESULT
- *   return BOAT_SUCCESS if set successed, otherwise return a failed code.
+ * @return
+ *   Return \c BOAT_SUCCESS if set successed, otherwise return a error code.
  ******************************************************************************/
 BOAT_RESULT BoatHlfabricWalletSetAccountInfo( BoatHlfabricWallet *wallet_ptr, 
 											  const BoatWalletPriKeyCtx_config prikeyCtx_config,
-											  const BCHAR *certName );
+											  const BoatHlfabricCertInfoCfg certContent );
 
 
-#if (HLFABRIC_TLS_SUPPORT == 1) && (HLFABRIC_TLS_IDENTIFY_CLIENT == 1)
+#if (BOAT_HLFABRIC_TLS_SUPPORT == 1) && (BOAT_HLFABRIC_TLS_IDENTIFY_CLIENT == 1)
 /*!****************************************************************************
  * @brief 
- *   set TLS key pairs of client.
+ *   Set TLS key pairs of client.
  *
  * @details
- *   this function used to set TLS key pairs of client. If server needs to 
+ *   This function used to set TLS key pairs of client. If server needs to 
  *   authenticate the client, this function needs to be enabled.
  *
  * @param wallet_ptr 
- *   fabric wallet pointer
+ *   Fabric wallet pointer.
  *
  * @param prikeyCtx_config 
- *   xxxxx
+ *   The private key information to be settings.
  *
- * @param certName
- *   full path of certificate used by TLS.
+ * @param certContent
+ *   The content of the certificate to be settings.
  *
- * @return BOAT_RESULT 
- *   return BOAT_SUCCESS if set successed, otherwise return a failed code.
+ * @return 
+ *   Return \c BOAT_SUCCESS if set successed, otherwise return a error code.
  *
- *@note this function is reserved for future.
+ *@note This function is reserved for future. DO NOT use it in your application.
  ******************************************************************************/
 BOAT_RESULT BoatHlfabricWalletSetTlsClientInfo( BoatHlfabricWallet *wallet_ptr, 
 											    const BoatWalletPriKeyCtx_config prikeyCtx_config,
-											    const BCHAR *certName );
+											    const BoatHlfabricCertInfoCfg certContent );
 #endif
 
 
-#if ( HLFABRIC_TLS_SUPPORT == 1 )
+#if ( BOAT_HLFABRIC_TLS_SUPPORT == 1 )
 /*!****************************************************************************
- * @brief set root CA certificate for TLS connection
+ * @brief Set root CA certificate for TLS connection.
  * 
  * @details
- *   set root CA certificate for TLS connection
+ *   Set root CA certificate for TLS connection.
  *
  * @param wallet_ptr 
- *   fabric wallet pointer
+ *   Fabric wallet pointer.
  *
- * @param rootCaFileName
- *   array of root CA certificate filename
+ * @param rootCaContent
+ *   Array of root CA certificate content.
  *
  * @param rootCaNumber
- *   number of root CA certificate to be set
+ *   Number of root CA certificate to be set.
  *
- * @return BOAT_RESULT 
- *   return BOAT_SUCCESS if set successed, otherwise return a failed code.
+ * @return 
+ *   Return \c BOAT_SUCCESS if set successed, otherwise return a error code.
  ******************************************************************************/
 BOAT_RESULT BoatHlfabricWalletSetRootCaInfo( BoatHlfabricWallet *wallet_ptr, 
-											 const BCHAR (*rootCaFileName)[BOAT_FILENAME_MAX_LEN],
+											 const BoatHlfabricCertInfoCfg *rootCaContent,
 											 BUINT32 rootCaNumber );
 #endif
 
 
 /*!****************************************************************************
  * @brief 
- *   set fabric network information
+ *   Set fabric network information.
  * 
  * @details
- *   this function used to set fabric network information, which include 
+ *   This function used to set fabric network information, which include 
  *   endorser and orderor node network information.
  *
  * @param wallet_ptr 
- *   fabric wallet pointer
+ *   Fabric wallet pointer.
  *
  * @param endorserInfo_ptr
- *   first member address of endorser node info array, the array include node 
+ *   First member address of endorser node info array, the array include node 
  *   URL and node hostname. 
- *   \n node URL is endorser addresss in "IP/domain name:port" format; node 
+ *   \n Node URL is endorser addresss in "IP/domain name:port" format; node 
  *   hostname is the CN field of endorser certificate, it is valid when TLS 
  *   be enabled only.
  *
  * @param endorserNumber
- *   number of endorser to be set
+ *   Number of endorser to be set.
  *
  * @param ordererInfo_ptr
- *   first member address of orderer node info array, the array include node 
+ *   First member address of orderer node info array, the array include node 
  *   URL and node hostname. 
- *   \n node URL is orderer addresss in "IP/domain name:port" format; node 
+ *   \n Node URL is orderer addresss in "IP/domain name:port" format; node 
  *   hostname is the CN field of orderer certificate, it is valid when TLS 
  *   be enabled only.
  *
  * @param ordererNumber
- *   number of orderer to be set
+ *   Number of orderer to be set.
  *
- * @return BOAT_RESULT 
- *   return BOAT_SUCCESS if set successed, otherwise return a failed code.
+ * @return 
+ *   Return \c BOAT_SUCCESS if set successed, otherwise return a error code.
  ******************************************************************************/
 BOAT_RESULT BoatHlfabricWalletSetNetworkInfo( BoatHlfabricWallet *wallet_ptr, 
 							const BoatHlfabricNodeInfoCfg *endorserInfo_ptr, BUINT32 endorserNumber,
@@ -310,66 +335,66 @@ BOAT_RESULT BoatHlfabricWalletSetNetworkInfo( BoatHlfabricWallet *wallet_ptr,
 
 /*!****************************************************************************
  * @brief 
- *   fabric wallet initinal
+ *   Fabric wallet initinal.
  *
  * @details
- *   this function used to initinal fabric wallet, include alloc wallet structrue
+ *   This function used to initinal fabric wallet, include alloc wallet structrue
  *   memory, setup fabric account information, TLS information and network information.
  *
  * @param config_ptr
- *   the fabric wallet configuration structure pointer
+ *   The fabric wallet configuration structure pointer.
  *
  * @param config_size 
- *   the fabric wallet configuration structure size
+ *   The fabric wallet configuration structure size.
  *
- * @return BoatHlfabricWallet* 
- *   if initinal success, return fabric wallet pointer, otherwise return NULL.
+ * @return
+ *   If initinal success, return fabric wallet pointer, otherwise return \c NULL.
  ******************************************************************************/
 BoatHlfabricWallet* BoatHlfabricWalletInit( const BoatHlfabricWalletConfig *config_ptr, 
-											 BUINT32 config_size );
+											BUINT32 config_size );
 
 
 /*!****************************************************************************
  * @brief 
- *   fabric wallet De-initinal
+ *   Fabric wallet de-initialize.
  * @details
- *   de-init fabric wallet, include free alloc memory and reset releated pointer
+ *   De-initialize fabric wallet, include free alloc memory and reset releated pointer
  *   to NULL.
  *
  * @param wallet_ptr 
- *   to be de-initinal fabric wallet pointer
+ *   To be de-initialized fabric wallet pointer.
  ******************************************************************************/
 void BoatHlfabricWalletDeInit( BoatHlfabricWallet *wallet_ptr );
 
 
 /*!****************************************************************************
  * @brief 
- *   fabric transaction initinal
+ *   Fabric transaction initinal.
  * @details
- *   this function used 
+ *   This function used to Initialize fabric transaction. 
  * @param tx_ptr
- *   fabric transaction structure pointer
+ *   Fabric transaction structure pointer to be initialized.
  *
  * @param wallet_ptr 
- *   fabric wallet structure pointer
+ *   Fabric wallet structure pointer to be initialized.
  *
  * @param chaincodeId_path_str 
- *   chaincode identification member named path
+ *   Chaincode identification member named path to be initialized.
  *
  * @param chaincodeId_name_str
- *   chaincode identification member named name
+ *   Chaincode identification member named name to be initialized.
  *
  * @param chaincodeId_version_str
- *   chaincode identification member named version
+ *   Chaincode identification member named version to be initialized.
  *
  * @param channelId_str 
- *   channel identification
+ *   Channel identification to be initialized.
  *
  * @param orgName_str 
- *   organization name
+ *   Organization name to be initialized.
  *
- * @return BOAT_RESULT 
- *   reuturn BOAT_SUCCESS if transaction initinal success, otherwise return failed code.
+ * @return 
+ *   Return \c BOAT_SUCCESS if transaction initinal success, otherwise return a error code.
  ******************************************************************************/
 BOAT_RESULT BoatHlfabricTxInit( BoatHlfabricTx *tx_ptr, 
 							    const BoatHlfabricWallet *wallet_ptr,
@@ -382,35 +407,39 @@ BOAT_RESULT BoatHlfabricTxInit( BoatHlfabricTx *tx_ptr,
 
 /*!****************************************************************************
  * @brief 
- *   fabric transaction de-initinal
+ *   Fabric transaction de-initinal.
  *
  * @details
+ *   This function used to De-Initialize fabric transaction. 
  *
  * @param tx_ptr 
- *        to be de-initinal fabric transaction structure pointer
+ *   To be de-initialized fabric transaction structure pointer.
+ * 
+ * @return 
+ *   This function doesn't return any thing.
  ******************************************************************************/
 void BoatHlfabricTxDeInit( BoatHlfabricTx *tx_ptr );
 
 
 /*!****************************************************************************
  * @brief 
- *   set transaction datatime
+ *   Set transaction datatime.
  *   
  * @details
- *   this function used to set transaction occurred datatime.
+ *   This function used to set transaction occurred datatime.
  *
  * @param tx_ptr 
- *   fabric transaction structure pointer
+ *   Fabric transaction structure pointer.
  *
  * @param sec
- *   passing seconds from 1970-01-01 00:00:00
+ *   Passing seconds from 1970-01-01 00:00:00.
  *
  * @param nanos
  *   Non-negative fractions of a second at nanosecond resolution.
- *   Must be from 0 to 999,999,999
+ *   Must be from 0 to 999,999,999.
  *
- * @return BOAT_RESULT 
- *   reuturn BOAT_SUCCESS if set success, otherwise return failed code.
+ * @return  
+ *   Return \c BOAT_SUCCESS if set success, otherwise return a error code.
  ******************************************************************************/
 BOAT_RESULT BoatHlfabricTxSetTimestamp( BoatHlfabricTx *tx_ptr, 
 										const BUINT64 sec, 
@@ -419,41 +448,57 @@ BOAT_RESULT BoatHlfabricTxSetTimestamp( BoatHlfabricTx *tx_ptr,
 
 /*!****************************************************************************
  * @brief 
- *   set transaction command arguments
+ *   Set transaction command arguments.
  *
  * @details
- *   this function used to set transaction command arguments.
+ *   This function used to set transaction command arguments.
  *
  * @param tx_ptr 
- *   fabric transaction structure pointer
+ *   Fabric transaction structure pointer.
  *
  * @param arg1
- *   the first argument of command
+ *   The first argument of command to be settings.
  *
  * @param ...
- *   remaining arguments, last argument must be NULL
+ *   Remaining arguments, last argument must be NULL.
  *
- * @return BOAT_RESULT 
- *   reuturn BOAT_SUCCESS if set success, otherwise return failed code.
+ * @return 
+ *   Return \c BOAT_SUCCESS if set success, otherwise return a error code.
  ******************************************************************************/
 BOAT_RESULT BoatHlfabricTxSetArgs( BoatHlfabricTx *tx_ptr, 
 								   const BCHAR *arg1, 
 								   ... );
 
+/*!****************************************************************************
+ * @brief 
+ *   Evaluate transaction.
+ *
+ * @details
+ *   This function should be invoked after BoatHlfabricTxSetTimestamp() and
+ *   BoatHlfabricTxSetArgs() had excuted.When you need to get states from
+ *   Hlfabric,use this function.
+ *
+ * @param tx_ptr 
+ *   Fabric transaction structure pointer.
+ *
+ * @return 
+ *   Return \c BOAT_SUCCESS if evaluate success, otherwise return a error code.
+ ******************************************************************************/
+BOAT_RESULT BoatHlfabricTxEvaluate( BoatHlfabricTx *tx_ptr );
 
 /*!****************************************************************************
  * @brief 
- *   submit transaction 
+ *   Submit transaction.
  *
  * @details
- *   this function should be invoked after #BoatHlfabricTxSetTimestamp(...) and
- *   #BoatHlfabricTxSetArgs(...) had excuted.
- *
+ *   This function should be invoked after BoatHlfabricTxSetTimestamp() and
+ *   BoatHlfabricTxSetArgs() had excuted.When you need to set states to
+ *   Hlfabric,use this function.
  * @param tx_ptr 
- *   fabric transaction structure pointer
+ *   Fabric transaction structure pointer.
  *
- * @return BOAT_RESULT 
- *   reuturn BOAT_SUCCESS if submit success, otherwise return failed code.
+ * @return 
+ *   Return \c BOAT_SUCCESS if submit success, otherwise return a error code.
  ******************************************************************************/
 BOAT_RESULT BoatHlfabricTxSubmit( BoatHlfabricTx *tx_ptr );
 

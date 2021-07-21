@@ -2,7 +2,7 @@
 # BoAT Framework
 [![Issue](https://img.shields.io/github/issues/aitos-io/BoAT-X-Framework)](https://github.com/aitos-io/BoAT-X-Framework/issues)![Forks](https://img.shields.io/github/forks/aitos-io/BoAT-X-Framework)![Stars](https://img.shields.io/github/stars/aitos-io/BoAT-X-Framework)[![GitHub Release](https://img.shields.io/github/license/aitos-io/BoAT-X-Framework)](https://github.com/aitos-io/BoAT-X-Framework/blob/master/LICENSE)[![Join the chat at https://gitter.im/BoAT-X/community](https://badges.gitter.im/BoAT-X/community.svg)](https://gitter.im/BoAT-X/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![aitos.io](https://aitos-io.github.io/BoAT-X-Framework/logo/aitos_logo_100.png)](http://www.aitos.io/)
+![BoAT logo](https://aitos-io.github.io/BoAT-X-Framework/logo/BoAT_RGB_Horizontal_100.png)
 
 
 ## Introduction
@@ -25,19 +25,17 @@ The other method is, the IoT devices directly invoke on-chain smart contract via
 The latter is the way **BoAT** is walking on. To ease off the effort that IoT device manufacturers have to take, *aitos.io* initiates and contributes to **BoAT**, the C-language blockchain application framework, enabling IoT device to easily access the blockchain. 
 
 
-### Supported Blockchain
+### Supported Blockchains and IoT Modules
 
-This version supports:
-+ Ethereum
-+ PlatON Enterprise (PlatONE)
-+ FISCO-BCOS
-+ Hyperledger Fabric
-
-More blockchains are to be supported.
+See [Supported List](./SUPPORTED_LIST.md) for supported blockchains and IoT modules.
 
 
 ### Release
 For full list of new features, please read [aitos.io Release Notes](https://github.com/aitos-io/BoAT-X-Framework/releases).
+
+
+### Project Status Report
+For project status update, please visit [BoAT Project Status Update Reports](https://github.com/aitos-io/project-status-update).
 
 
 ## Quick Start
@@ -81,9 +79,9 @@ For public blockchain, you must prepare some gas for transaction fee in advance.
 For consortium blockchain , you must consult the administrator to give you access permission on the blockchain. Or you may deploy your own consortium blockchain node for test purpose.
 
 See blockchain official website for details:
-For [Ethereum](https://ethereum.org/)
-For [Ganache: an Ethereum Simulator](https://www.trufflesuite.com/truffle/)
-For [PlatON Enterprise](https://github.com/PlatONEnterprise/)
++ [Ethereum](https://ethereum.org/)
++ [Ganache: an Ethereum Simulator](https://www.trufflesuite.com/truffle/)
++ [PlatON Enterprise](https://github.com/PlatONEnterprise/)
 
 #### Deploy the smart contract
 The smart contracts used in the demo locate in ./contract.
@@ -104,7 +102,6 @@ Modify the demo code in ./demo:
 <SDKRoot>
 |
 +---build           | Directory to store object and executable files
-+---contract        | Demo smart contract ABI and generated C interface file
 +---demo            | Demo application
 +---docs            | API reference manual
 +---vendor          | Special vendor dependency
@@ -113,11 +110,10 @@ Modify the demo code in ./demo:
 +---include         | Header files for application to include
 +---lib             | Lib files for application to link with
 +---sdk             | SDK source
-|   +---third-party |     Three party libraries
+|   +---third-party |     Third party libraries
 |   +---include     |     Header files for SDK internal use
 |   +---protocol    |     Blockchain client protocol implementation
 |   +---rlp         |     RLP encoder
-|   +---rpc         |     Remote procedure call wrapper
 |   +---utilities   |     Utility APIs
 |   \---wallet      |     SDK entry API implementation
 +---tests           | Test cases
@@ -137,11 +133,15 @@ The built demo application locates at:
 
 #### To build BoAT libraries only
 ```
+$make
+```
+or
+```
 $make boatlibs
 ```
 The built libraries locate at:
 ./lib/libboatwallet.a
-./lib/libboathwdep.a
+./lib/libboatvendor.a
 
 
 #### To clean everything
@@ -155,10 +155,10 @@ $make clean
 If BoAT is built for Cygwin or linux-x86_64, run the demo application:
 real node of an Ethereum compatible blockchain network must be available.
 ```
-$chmod a+x ./build/demo/boatdemo
-$./build/demo/boatdemo
+$chmod a+x ./build/demo/demo_<protocol>/<demo_name>
+$./build/demo/demo_<protocol>/<demo_name>
 ```
-
+< protocol> can be `ethereum` `fiscobcos` `platone` `fabric`.
 Make sure the network connection to the blockchain node (or blockchain simulator) is available.
 
 
@@ -210,13 +210,18 @@ Add include file search path:
     
 Add to link options all library files in <SDKRoot>/lib in sequence:
 +   libboatwallet.a
-+   libboathwdep.a
++   libboatvendor.a
 
-Add to link options: -lcurl -lcrypto
+Add to link options: -lcurl
 
 
 #### Modify your C code
-Add: #include "boatiotsdk.h"
+Add include header files:
+```
+#include "boatconfig.h"
+#include "boatiotsdk.h"
+```
+
 Follow instructions in [*How to Call a Contract in Your C code*](#how-to-call-a-contract-in-your-c-code).
 
 
@@ -233,6 +238,8 @@ TBD
 The BoAT-X Framework community can be found at:
 + Contact Mail: info@aitos.io
 + Report Bugs: [BoAT-X Issues](https://github.com/aitos-io/BoAT-X-Framework/issues)
++ Medium: https://aitos-io.medium.com/
++ LinkedIn: https://www.linkedin.com/company/aitos-io
 + WeChat Group: Add WeChat "miatang51213" to join the group
 
 To chat with other community members you can join the [BoAT-X Gitter](https://gitter.im/BoAT-X/community)
@@ -253,4 +260,8 @@ Submit Pull Requests at [Pull Requests](https://github.com/aitos-io/BoAT-X-Frame
 Apache License 2.0, see [LICENSE](./LICENSE).
 
 
-## Join us as a BoAT-Mariner and pioneer your IoT+Blockchain path in 2021
+## Join us as a BoAT-Mariner and pioneer your IoT+Blockchain path
+
+**Open source by [aitos.io](http://www.aitos.io/)**
+
+[![aitos.io](https://aitos-io.github.io/BoAT-X-Framework/logo/aitos_logo_100.png)](http://www.aitos.io/)

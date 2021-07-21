@@ -20,10 +20,10 @@ OBJECTS = $(wildcard $(BOAT_BUILD_DIR)/sdk/third-party/cJSON/*.o) \
 		  $(wildcard $(BOAT_BUILD_DIR)/sdk/protocol/boatfiscobcos/*.o) \
 		  $(wildcard $(BOAT_BUILD_DIR)/sdk/platform/*.o) \
 		  $(wildcard $(BOAT_BUILD_DIR)/sdk/protocol/boathlfabric/*.o) \
-		  $(wildcard $(BOAT_BUILD_DIR)/sdk/protocol/common/*.o) \
+		  $(wildcard $(BOAT_BUILD_DIR)/sdk/protocol/common/http2intf/*.o) \
+		  $(wildcard $(BOAT_BUILD_DIR)/sdk/protocol/common/web3intf/*.o) \
 		  $(wildcard $(BOAT_BUILD_DIR)/sdk/protocol/*.o) \
           $(wildcard $(BOAT_BUILD_DIR)/sdk/rlp/*.o) \
-          $(wildcard $(BOAT_BUILD_DIR)/sdk/rpc/*.o) \
           $(wildcard $(BOAT_BUILD_DIR)/sdk/utilities/*.o) \
           $(wildcard $(BOAT_BUILD_DIR)/sdk/wallet/*.o)
 

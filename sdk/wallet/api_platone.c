@@ -20,6 +20,7 @@
 boatPlatonewallet.c defines the Platone wallet API for BoAT IoT SDK.
 */
 
+#include "boatconfig.h"
 #include "boatinternal.h"
 #if PROTOCOL_USE_PLATONE == 1
 #include "web3intf.h"
@@ -35,9 +36,9 @@ boatPlatonewallet.c defines the Platone wallet API for BoAT IoT SDK.
 BOAT_RESULT BoatPlatoneTxInit( BoatPlatoneWallet *wallet_ptr,
 							   BoatPlatoneTx *tx_ptr,
 							   BBOOL is_sync_tx,
-							   BCHAR * gasprice_str,
-							   BCHAR * gaslimit_str,
-							   BCHAR * recipient_str,
+							   BCHAR *gasprice_str,
+							   BCHAR *gaslimit_str,
+							   BCHAR *recipient_str,
 							   BoatPlatoneTxtype txtype)
 {
     BOAT_RESULT result;
@@ -57,7 +58,7 @@ BOAT_RESULT BoatPlatoneTxInit( BoatPlatoneWallet *wallet_ptr,
     if( result != BOAT_SUCCESS )
     {
 		BoatLog(BOAT_LOG_CRITICAL, "platone Tx init failed.");
-        return BOAT_ERROR;
+        return result;
     }
 
     // Set transaction type
@@ -66,7 +67,7 @@ BOAT_RESULT BoatPlatoneTxInit( BoatPlatoneWallet *wallet_ptr,
     if( result != BOAT_SUCCESS )
     {
 		BoatLog(BOAT_LOG_CRITICAL, "platone set Tx type failed.");
-        return BOAT_ERROR;
+        return result;
     }
     
     return BOAT_SUCCESS;
@@ -87,7 +88,7 @@ BOAT_RESULT BoatPlatoneTxSetTxtype(BoatPlatoneTx *tx_ptr, BoatPlatoneTxtype txty
 }
 
 
-BCHAR * BoatPlatoneCallContractFunc( BoatPlatoneTx *tx_ptr, BUINT8 *rlp_param_ptr,
+BCHAR *BoatPlatoneCallContractFunc( BoatPlatoneTx *tx_ptr, BUINT8 *rlp_param_ptr,
 									 BUINT32 rlp_param_len )
 {
     // *2 for bin to HEX, + 3 for "0x" prefix and NULL terminator
@@ -102,7 +103,7 @@ BCHAR * BoatPlatoneCallContractFunc( BoatPlatoneTx *tx_ptr, BUINT8 *rlp_param_pt
         return NULL;
     }
 
-	if (rlp_param_len > BOAT_MAX_LEN)
+	if (rlp_param_len > BOAT_STRING_MAX_LEN)
 	{
         BoatLog(BOAT_LOG_CRITICAL, "Arguments check error.");
         return NULL;
@@ -116,7 +117,7 @@ BCHAR * BoatPlatoneCallContractFunc( BoatPlatoneTx *tx_ptr, BUINT8 *rlp_param_pt
 
     BCHAR recipient_hexstr[BOAT_PLATONE_ADDRESS_SIZE*2+3];
     
-    UtilityBin2Hex( recipient_hexstr, tx_ptr->rawtx_fields.recipient, BOAT_PLATONE_ADDRESS_SIZE,
+    UtilityBinToHex( recipient_hexstr, tx_ptr->rawtx_fields.recipient, BOAT_PLATONE_ADDRESS_SIZE,
 					BIN2HEX_LEFTTRIM_UNFMTDATA, BIN2HEX_PREFIX_0x_YES, BOAT_FALSE );
     param_eth_call.to = recipient_hexstr;
 
@@ -125,7 +126,7 @@ BCHAR * BoatPlatoneCallContractFunc( BoatPlatoneTx *tx_ptr, BUINT8 *rlp_param_pt
     param_eth_call.gasPrice = "0x8250de00";
 
     // Set function parameters
-    UtilityBin2Hex( data_str, rlp_param_ptr, rlp_param_len,
+    UtilityBinToHex( data_str, rlp_param_ptr, rlp_param_len,
 					BIN2HEX_LEFTTRIM_UNFMTDATA, BIN2HEX_PREFIX_0x_YES, BOAT_FALSE );
     param_eth_call.data = data_str;
     param_eth_call.block_num_str = "latest";
@@ -162,7 +163,7 @@ BOAT_RESULT BoatPlatoneTxSend(BoatPlatoneTx *tx_ptr)
 }
 
 
-BOAT_RESULT BoatPlatoneTransfer(BoatPlatoneTx *tx_ptr, BCHAR * value_hex_str)
+BOAT_RESULT BoatPlatoneTransfer(BoatPlatoneTx *tx_ptr, BCHAR *value_hex_str)
 {
     BoatFieldMax32B   value;
     BoatFieldVariable data;
@@ -177,13 +178,19 @@ BOAT_RESULT BoatPlatoneTransfer(BoatPlatoneTx *tx_ptr, BCHAR * value_hex_str)
     
     // Set nonce
     result = BoatPlatoneTxSetNonce(tx_ptr, BOAT_PLATONE_NONCE_AUTO);
-    if( result != BOAT_SUCCESS ) return BOAT_ERROR;
+    if( result != BOAT_SUCCESS )
+    {
+         return result;
+    }
     
     // Set value
-    value.field_len = UtilityHex2Bin( value.field, 32, value_hex_str,
+    value.field_len = UtilityHexToBin( value.field, 32, value_hex_str,
 									  TRIMBIN_LEFTTRIM, BOAT_TRUE  );
     result = BoatPlatoneTxSetValue(tx_ptr, &value);
-    if( result != BOAT_SUCCESS ) return BOAT_ERROR;
+    if( result != BOAT_SUCCESS )
+    {
+         return result;
+    }
 	
     // Set data (contains txtype only)
     UtilityUint64ToBigend( (BUINT8*)&tx_type_big, 0,  TRIMBIN_TRIM_NO );
@@ -191,12 +198,18 @@ BOAT_RESULT BoatPlatoneTransfer(BoatPlatoneTx *tx_ptr, BCHAR * value_hex_str)
     data.field_len = sizeof(BUINT64);
     
     result = BoatPlatoneTxSetData(tx_ptr, &data);
-    if( result != BOAT_SUCCESS ) return BOAT_ERROR;
+    if( result != BOAT_SUCCESS )
+    {
+         return result;
+    }
     
     // Perform the transaction
     // NOTE: Field v,r,s are calculated automatically
     result = BoatPlatoneTxSend( tx_ptr );
-    if( result != BOAT_SUCCESS ) return BOAT_ERROR;
+    if( result != BOAT_SUCCESS )
+    {
+         return result;
+    }
 
     return BOAT_SUCCESS;
 }

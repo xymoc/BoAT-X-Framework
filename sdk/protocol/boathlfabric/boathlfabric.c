@@ -23,6 +23,7 @@ wait for its receipt.
 
 
 /* self-header include */
+#include "boatconfig.h"
 #include "boathlfabric.h"
 
 #if PROTOCOL_USE_HLFABRIC == 1
@@ -63,8 +64,8 @@ wait for its receipt.
  *   In internal of this function, the memory of store serialize data has been alloced,
  *   caller SHOULD NOT alloc memory for this pointer again.
  *
- * @return BOAT_RESULT 
- *   return BOAT_SUCCESS if packed successed, otherwise return a failed code. 
+ * @return 
+ *   Return \c BOAT_SUCCESS if packed successed, otherwise return a failed code. 
  *
  * @see hlfabricChannelHeaderPacked
  ******************************************************************************/
@@ -177,8 +178,8 @@ __BOATSTATIC BOAT_RESULT hlfabricSignatureHeaderPacked(const BoatHlfabricTx *tx_
  *   In internal of this function, the memory of store serialize data has been alloced,
  *   caller SHOULD NOT alloc memory for this pointer again.
  *
- * @return BOAT_RESULT 
- *   return BOAT_SUCCESS if packed successed, otherwise return a failed code. 
+ * @return 
+ *   Return \c BOAT_SUCCESS if packed successed, otherwise return a failed code. 
  *
  * @see hlfabricSignatureHeaderPacked
  ******************************************************************************/
@@ -210,7 +211,7 @@ __BOATSTATIC BOAT_RESULT hlfabricChannelHeaderPacked(const BoatHlfabricTx *tx_pt
 	channelHeader.channel_id             = (BCHAR *)tx_ptr->var.channelId;
 	/* -txID */
 	memset( txIdString, 0, sizeof(txIdString) );
-	UtilityBin2Hex( txIdString, txIdBin, 32, BIN2HEX_LEFTTRIM_UNFMTDATA, BIN2HEX_PREFIX_0x_NO, BOAT_FALSE );
+	UtilityBinToHex( txIdString, txIdBin, 32, BIN2HEX_LEFTTRIM_UNFMTDATA, BIN2HEX_PREFIX_0x_NO, BOAT_FALSE );
 	channelHeader.tx_id                  = txIdString;
 	/* -extension */
 	chaincodeHeaderExtension.has_payload_visibility = false;
@@ -266,8 +267,8 @@ __BOATSTATIC BOAT_RESULT hlfabricChannelHeaderPacked(const BoatHlfabricTx *tx_pt
  *   In internal of this function, the memory of store serialize data has been alloced,
  *   caller SHOULD NOT alloc memory for this pointer again.
  *
- * @return BOAT_RESULT 
- *   return BOAT_SUCCESS if packed successed, otherwise return a failed code. 
+ * @return 
+ *   Return \c BOAT_SUCCESS if packed successed, otherwise return a failed code. 
  ******************************************************************************/
 __BOATSTATIC BOAT_RESULT hlfabricProposalPayloadDataPacked(BoatHlfabricTx *tx_ptr, 
 														   BoatFieldVariable *output_ptr)
@@ -277,7 +278,7 @@ __BOATSTATIC BOAT_RESULT hlfabricProposalPayloadDataPacked(BoatHlfabricTx *tx_pt
 	Protos__ChaincodeSpec  chaincodeSpec  = PROTOS__CHAINCODE_SPEC__INIT;
     Protos__ChaincodeID    chaincodeId    = PROTOS__CHAINCODE_ID__INIT;
     Protos__ChaincodeInput input          = PROTOS__CHAINCODE_INPUT__INIT;
-	ProtobufCBinaryData    argsTmp[HLFABRIC_ARGS_MAX_NUM];
+	ProtobufCBinaryData    argsTmp[BOAT_HLFABRIC_ARGS_MAX_NUM];
 	BUINT8 *chaincodeInvocationSpecBuffer = NULL;
 	BUINT16 packedLength;
 	
@@ -298,7 +299,7 @@ __BOATSTATIC BOAT_RESULT hlfabricProposalPayloadDataPacked(BoatHlfabricTx *tx_pt
     /* ------------>input */
 	chaincodeInvocationSpec.chaincode_spec->input = &input;
     input.n_args           = tx_ptr->var.args.nArgs;
-	for( int i = 0; i < HLFABRIC_ARGS_MAX_NUM; i++ )
+	for( int i = 0; i < BOAT_HLFABRIC_ARGS_MAX_NUM; i++ )
 	{
 		argsTmp[i].data = (BUINT8 *)tx_ptr->var.args.args[i];
 		if(tx_ptr->var.args.args[i] != NULL)
@@ -368,20 +369,20 @@ __BOATSTATIC BOAT_RESULT hlfabricProposalPayloadDataPacked(BoatHlfabricTx *tx_pt
  *   In internal of this function, the memory of store serialize data has been alloced,
  *   caller SHOULD NOT alloc memory for this pointer again.
  *
- * @return BOAT_RESULT 
- *   return BOAT_SUCCESS if packed successed, otherwise return a failed code. 
+ * @return 
+ *   Return \c BOAT_SUCCESS if packed successed, otherwise return a failed code. 
  ******************************************************************************/
 __BOATSTATIC BOAT_RESULT hlfabricTransactionPayloadDataPacked(BoatHlfabricTx *tx_ptr,
 															  BoatFieldVariable *output_ptr)
 {
-	Protos__Endorsement  endorsement[HLFABRIC_ENDORSER_MAX_NUM] = {PROTOS__ENDORSEMENT__INIT};
-    Protos__Endorsement *endorsement_ptr[HLFABRIC_ENDORSER_MAX_NUM];
+	Protos__Endorsement  endorsement[BOAT_HLFABRIC_ENDORSER_MAX_NUM] = {PROTOS__ENDORSEMENT__INIT};
+    Protos__Endorsement *endorsement_ptr[BOAT_HLFABRIC_ENDORSER_MAX_NUM];
 	Protos__Transaction transaction                           = PROTOS__TRANSACTION__INIT;
 	Protos__TransactionAction  transactionAction              = PROTOS__TRANSACTION_ACTION__INIT;
     Protos__TransactionAction *transactionAction_ptr          = NULL;
 	Protos__ChaincodeActionPayload chaincodeActionPayload     = PROTOS__CHAINCODE_ACTION_PAYLOAD__INIT;
 	Protos__ChaincodeEndorsedAction chaincodeEndorsedAction   = PROTOS__CHAINCODE_ENDORSED_ACTION__INIT;
-	BUINT8 *chaincodeProposalPayloadBuffer                    = NULL;
+	//BUINT8 *chaincodeProposalPayloadBuffer                    = NULL;
 	BUINT8 *chaincodeActionPayloadBuffer                      = NULL;	
 	BUINT32 transactionBufferLen;
 	BUINT32 chaincodeActionPayloadBufferLen;
@@ -473,7 +474,7 @@ __BOATSTATIC BOAT_RESULT hlfabricTransactionPayloadDataPacked(BoatHlfabricTx *tx
 
 	/* free malloc */
 	BoatFree(signatureHeadPacked.field_ptr);
-	BoatFree(chaincodeProposalPayloadBuffer);
+	// BoatFree(chaincodeProposalPayloadBuffer);
 	BoatFree(chaincodeActionPayloadBuffer);
 	BoatFree(payloadDataPacked.field_ptr);
 
@@ -497,8 +498,8 @@ __BOATSTATIC BOAT_RESULT hlfabricTransactionPayloadDataPacked(BoatHlfabricTx *tx
  *   In internal of this function, the memory of store serialize data has been alloced,
  *   caller SHOULD NOT alloc memory for this pointer again.
  *
- * @return BOAT_RESULT 
- *   return BOAT_SUCCESS if packed successed, otherwise return a failed code. 
+ * @return 
+ *   Return \c BOAT_SUCCESS if packed successed, otherwise return a failed code. 
  ******************************************************************************/
 __BOATSTATIC BOAT_RESULT hlfabricPayloadPacked(BoatHlfabricTx *tx_ptr, 
 		                                       BoatFieldVariable *output_ptr)
@@ -591,11 +592,9 @@ BOAT_RESULT hlfabricProposalTransactionPacked(BoatHlfabricTx *tx_ptr)
 	Common__Envelope envelope       = COMMON__ENVELOPE__INIT;
 	BoatFieldVariable payloadPacked = {NULL, 0};
 	BoatSignatureResult signatureResult;
-	BUINT8  grpcHeader[5];
-	BUINT8  hash[32];
-	//BUINT8  signature[139];//139 is ECDSA MAX LENGTH
-	//size_t  signatureLen;
-	BUINT32 packedLength;
+	BUINT8   grpcHeader[5];
+	BUINT8   hash[32];
+	BUINT32  packedLength;
 	BUINT8  *packedData = NULL;
 	
 	BOAT_RESULT result = BOAT_SUCCESS;
@@ -639,13 +638,13 @@ BOAT_RESULT hlfabricProposalTransactionPacked(BoatHlfabricTx *tx_ptr)
 	if( result != BOAT_SUCCESS )
 	{
 		BoatLog(BOAT_LOG_CRITICAL, "Fail to exec BoatSignature.");
-		boat_throw(BOAT_ERROR_FAILED_GEN_SIGNATURE, hlfabricProposalTransactionPacked_exception);
+		boat_throw(BOAT_ERROR_GEN_SIGNATURE_FAILED, hlfabricProposalTransactionPacked_exception);
 	}
 	
 	if( !signatureResult.pkcs_format_used )
 	{
 		BoatLog(BOAT_LOG_CRITICAL, "Fail to find expect signature.");
-		boat_throw(BOAT_ERROR_FAILED_GEN_SIGNATURE, hlfabricProposalTransactionPacked_exception);
+		boat_throw(BOAT_ERROR_GEN_SIGNATURE_FAILED, hlfabricProposalTransactionPacked_exception);
 	}
 
 	/* step-5: pack the envelope */
@@ -659,10 +658,10 @@ BOAT_RESULT hlfabricProposalTransactionPacked(BoatHlfabricTx *tx_ptr)
 	
 	/* step-6: packed length assignment */
 	tx_ptr->wallet_ptr->http2Context_ptr->sendBuf.field_len = packedLength + sizeof(grpcHeader);
-	if( tx_ptr->wallet_ptr->http2Context_ptr->sendBuf.field_len > HTTP2_SEND_MAX_BUF )
+	if( tx_ptr->wallet_ptr->http2Context_ptr->sendBuf.field_len > BOAT_HLFABRIC_HTTP2_SEND_BUF_MAX_LEN )
 	{
-		BoatLog(BOAT_LOG_CRITICAL, "packed length out of sendbuffer limit.");
-		boat_throw(BOAT_ERROR_BUFFER_EXHAUSTED, hlfabricProposalTransactionPacked_exception);
+		BoatLog(BOAT_LOG_CRITICAL, "packed length out of sendbuffer size limit.");
+		boat_throw(BOAT_ERROR_OUT_OF_MEMORY, hlfabricProposalTransactionPacked_exception);
 	}
 	
 	/* step-7: packed data assignment */
